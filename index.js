@@ -6,6 +6,8 @@ console.log("Starting bot...");
 const discordToken = process.env.DISCORD_TOKEN;
 const difyToken = process.env.DIFY_TOKEN;
 let conversationId = process.env.CONVERSATION_ID || null;
+const http = require('http');
+
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -56,3 +58,7 @@ client.on(Events.MessageCreate, async message => {
 
   }
 });
+
+http.createServer(function (req, res) {
+  res.write("I'm alive"); res.end();
+}).listen(8080);

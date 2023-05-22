@@ -42,7 +42,7 @@ client.on(Events.MessageCreate, async message => {
           "query": message.content,
           "response_mode": "blocking",
           "conversation_id": conversationId,
-          "user": message.author.id,
+          "user": "discord-bot",
         })
       });
       // extract JSON from the http response

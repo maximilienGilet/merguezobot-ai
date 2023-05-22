@@ -1,10 +1,11 @@
 // Require the necessary discord.js classes
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
+const fetch = require('node-fetch');
 console.log("Starting bot...");
 const discordToken = process.env.DISCORD_TOKEN;
 const difyToken = process.env.DIFY_TOKEN;
-const conversationId = process.env.CONVERSATION_ID;
+let conversationId = process.env.CONVERSATION_ID || null;
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -44,10 +45,12 @@ client.on(Events.MessageCreate, async message => {
       });
       // extract JSON from the http response
       const data = await response.json();
+      conversationId = data.conversation_id;
       console.log(data);
 
       return message.reply(data.answer);
     } catch (error) {
+      console.log(error);
       return message.reply("J'ai pas envie de te parler là");
     }
 

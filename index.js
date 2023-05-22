@@ -41,8 +41,8 @@ client.on(Events.MessageCreate, async message => {
           "inputs": [],
           "query": message.content,
           "response_mode": "blocking",
-          "conversation_id": conversationId,
-          "user": message.guild.id || "Discord",
+          "conversation_id": message.guild.id,
+          "user": message.author.id,
         })
       });
       // extract JSON from the http response

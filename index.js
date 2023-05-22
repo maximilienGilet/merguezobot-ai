@@ -43,6 +43,10 @@ client.on(Events.MessageCreate, async message => {
           "user": message.author.id,
         })
       });
+
+      if (!response.ok) throw new Error(response.statusText
+        || `HTTP error ${response.status}`);
+
       // extract JSON from the http response
       const data = await response.json();
       console.log(data);

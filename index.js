@@ -5,7 +5,6 @@ const fetch = require('node-fetch');
 console.log("Starting bot...");
 const discordToken = process.env.DISCORD_TOKEN;
 const difyToken = process.env.DIFY_TOKEN;
-let conversationId = process.env.CONVERSATION_ID || null;
 const http = require('http');
 
 
@@ -41,13 +40,11 @@ client.on(Events.MessageCreate, async message => {
           "inputs": [],
           "query": message.content,
           "response_mode": "blocking",
-          "conversation_id": conversationId,
           "user": message.author.id,
         })
       });
       // extract JSON from the http response
       const data = await response.json();
-      conversationId = data.conversation_id;
       console.log(data);
 
       return message.reply(data.answer);

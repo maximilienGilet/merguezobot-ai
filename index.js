@@ -49,7 +49,6 @@ client.on(Events.MessageCreate, async message => {
 
       // extract JSON from the http response
       const data = await response.json();
-      console.log(data);
 
       return message.reply(data.answer);
     } catch (error) {

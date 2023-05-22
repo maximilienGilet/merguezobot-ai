@@ -41,7 +41,7 @@ client.on(Events.MessageCreate, async message => {
           "inputs": [],
           "query": message.content,
           "response_mode": "blocking",
-          "conversation_id": message.guild.id,
+          "conversation_id": conversationId,
           "user": message.author.id,
         })
       });

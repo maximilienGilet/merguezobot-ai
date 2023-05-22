@@ -24,7 +24,7 @@ client.on(Events.MessageCreate, async message => {
 
   if (message.content.includes("@here") || message.content.includes("@everyone") || message.type == "REPLY") return false;
 
-  if (message.mentions.has(client.user.id)) {
+  if (message.mentions.has(client.user.id) || message.replyTo?.id == client.user.id) {
     message.channel.sendTyping();
 
     try {

@@ -34,6 +34,7 @@ const aiResponse = async (message) => {
         "query": message.content,
         "response_mode": "blocking",
         "conversation_id": conversations[serverName] || "",
+        "user": serverName,
       })
     });
 

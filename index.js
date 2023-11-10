@@ -1,9 +1,6 @@
 // Require the necessary discord.js classes
 const { Client, Events, GatewayIntentBits } = require('discord.js');
-const puppeteer = require('puppeteer-extra')
 // add stealth plugin and use defaults (all evasion techniques)
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-puppeteer.use(StealthPlugin())
 require('dotenv').config();
 
 const fetch = require('node-fetch');

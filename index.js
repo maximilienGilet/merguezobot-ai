@@ -111,6 +111,12 @@ client.on(Events.MessageCreate, async (message) => {
     const insult = insults[Math.floor(Math.random() * insults.length)];
     return message.reply(insult);
   }
+
+  // reply "ouais fin raconte pas ta vie" randomly with a probability of 1 in 1000
+  const random = Math.floor(Math.random() * 1000);
+  if (random == 1) {
+    return message.reply("ouais fin raconte pas ta vie");
+  }
 });
 
 // Respond to health checks
@@ -120,4 +126,3 @@ http
     res.end();
   })
   .listen(8080);
-

@@ -112,8 +112,8 @@ client.on(Events.MessageCreate, async (message) => {
     return message.reply(insult);
   }
 
-  // reply "ouais fin raconte pas ta vie" randomly with a probability of 1 in 1000
-  const random = Math.floor(Math.random() * 1000);
+  // reply "ouais fin raconte pas ta vie" randomly with a probability of 1 in 100
+  const random = Math.floor(Math.random() * 100);
   if (random == 1) {
     return message.reply("ouais fin raconte pas ta vie");
   }

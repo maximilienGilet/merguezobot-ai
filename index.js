@@ -26,6 +26,22 @@ const insults = [
   "C'était mieux quand t'étais mute",
 ];
 
+const randomReplies = [
+  "Ouais fin raconte pas ta vie",
+  "Ok tamere",
+  "Manje moi lpoiro",
+  "Sayer frr ftg",
+  "Eh gros sayer",
+  "On a déjà entendu cette histoire 40 fois.",
+  "Les femmes te disent la même chose ?",
+  "Quel est le rapport avec les Juifs ?",
+  "Mais, du coup , t'as voté Marcon ?",
+  "EH BEN MOI UNE FOIS J'AI PISSÉ PAR LA FENÊTRE",
+  "Mais ma parole vous êtes beuré vous aussi.",
+  "Qui s'en fout ?",
+  "Ta geule ?",
+];
+
 const aiResponse = async (message) => {
   message.channel.sendTyping();
 
@@ -112,10 +128,12 @@ client.on(Events.MessageCreate, async (message) => {
     return message.reply(insult);
   }
 
-  // reply "ouais fin raconte pas ta vie" randomly with a probability of 1 in 100
+  // reply a random message randomly with a probability of 1 in 100 for messages longer than 20 characters
   const random = Math.floor(Math.random() * 100);
-  if (random == 1) {
-    return message.reply("ouais fin raconte pas ta vie");
+  if (random == 1 && message.content.length > 20) {
+    const message =
+      randomReplies[Math.floor(Math.random() * randomReplies.length)];
+    return message.reply(message);
   }
 });
 

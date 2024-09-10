@@ -131,9 +131,9 @@ client.on(Events.MessageCreate, async (message) => {
   // reply a random message randomly with a probability of 1 in 100 for messages longer than 20 characters
   const random = Math.floor(Math.random() * 100);
   if (random == 1 && message.content.length > 20) {
-    const message =
+    const randomReply =
       randomReplies[Math.floor(Math.random() * randomReplies.length)];
-    return message.reply(message);
+    return message.reply(randomReply);
   }
 });
 

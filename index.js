@@ -89,8 +89,6 @@ const aiResponseAbrege = async (message) => {
   const command =
     "Abrège en une seule phrase le message suivant : " + message.content;
 
-  console.log("command : " + command);
-
   try {
     // send POST request to https://api.dify.ai/v1 to get response
     const response = await fetch("https://api.dify.ai/v1/chat-messages", {

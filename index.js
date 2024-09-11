@@ -1,5 +1,6 @@
 // Require the necessary discord.js classes
 const { Client, Events, GatewayIntentBits } = require("discord.js");
+const tesseract = require("node-tesseract-ocr");
 // add stealth plugin and use defaults (all evasion techniques)
 require("dotenv").config();
 
@@ -83,11 +84,41 @@ const aiResponse = async (message) => {
   }
 };
 
-const aiResponseAbrege = async (message) => {
+const recognizeFromUrl = async (url) => {
+  const config = {
+    lang: "fra",
+    oem: 1,
+    psm: 3,
+  };
+
+  const text = await tesseract.recognize(url, config);
+  return text;
+};
+
+const aiResponseAbrege = async (originalMessage, message) => {
   message.channel.sendTyping();
 
-  const command =
+  let command =
     "Abrège en une seule phrase le message suivant : " + message.content;
+
+  // add OCR with tesseract when the message contains a picture
+  if (message.attachments.size > 0) {
+    const attachment = message.attachments.first();
+    const url = attachment.url;
+    try {
+      const text = await recognizeFromUrl(url);
+      command += "\n\n" + text;
+    } catch (error) {}
+  }
+
+  // add OCR with tesseract when the message contains a link
+  if (message.content.startsWith("https://")) {
+    const url = message.content;
+    try {
+      const text = await recognizeFromUrl(url);
+      command += "\n\n" + text;
+    } catch (error) {}
+  }
 
   try {
     // send POST request to https://api.dify.ai/v1 to get response
@@ -114,10 +145,10 @@ const aiResponseAbrege = async (message) => {
     // extract JSON from the http response
     const data = await response.json();
 
-    return message.reply(data.answer);
+    return originalMessage.reply(data.answer);
   } catch (error) {
     console.log(error);
-    return message.reply(errorMessage);
+    return originalMessage.reply(errorMessage);
   }
 };
 
@@ -152,10 +183,7 @@ client.on(Events.MessageCreate, async (message) => {
     return false;
 
   // When talking to the bot
-  if (
-    message.mentions.has(client.user.id) ||
-    message.replyTo?.id == client.user.id
-  ) {
+  if (message.mentions.has(client.user.id)) {
     return await aiResponse(message);
   }
 
@@ -167,7 +195,7 @@ client.on(Events.MessageCreate, async (message) => {
     !message.mentions.has(client.user.id)
   ) {
     const referenceMessage = await message.fetchReference();
-    return await aiResponseAbrege(referenceMessage);
+    return await aiResponseAbrege(message, referenceMessage);
   }
 
   // If the message is send by François and it talks about his CX, reply with a random insult

@@ -83,6 +83,46 @@ const aiResponse = async (message) => {
   }
 };
 
+const aiResponseAbrege = async (message) => {
+  message.channel.sendTyping();
+
+  const command =
+    "Abrège en une seule phrase le message suivant : " + message.content;
+
+  console.log("command : " + command);
+
+  try {
+    // send POST request to https://api.dify.ai/v1 to get response
+    const response = await fetch("https://api.dify.ai/v1/chat-messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${difyToken}`,
+      },
+      body: JSON.stringify({
+        inputs: [],
+        query: command,
+        response_mode: "blocking",
+        conversation_id: "",
+        user: "abrege",
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(response);
+      throw new Error(response.statusText || `HTTP error ${response.status}`);
+    }
+
+    // extract JSON from the http response
+    const data = await response.json();
+
+    return message.reply(data.answer);
+  } catch (error) {
+    console.log(error);
+    return message.reply(errorMessage);
+  }
+};
+
 // Create a new client instance
 const client = new Client({
   intents: [
@@ -119,6 +159,17 @@ client.on(Events.MessageCreate, async (message) => {
     message.replyTo?.id == client.user.id
   ) {
     return await aiResponse(message);
+  }
+
+  // when asking "abrege" or "abrège", and the message is not a reply to the bot
+  if (
+    ((message.reference?.messageId &&
+      message.content.toLowerCase().includes("abrege")) ||
+      message.content.toLowerCase().includes("abrège")) &&
+    !message.mentions.has(client.user.id)
+  ) {
+    const referenceMessage = await message.fetchReference();
+    return await aiResponseAbrege(referenceMessage);
   }
 
   // If the message is send by François and it talks about his CX, reply with a random insult

@@ -43,14 +43,8 @@ const randomReplies = [
   "Ta geule ?",
 ];
 
-const aiResponse = async (message) => {
-  message.channel.sendTyping();
-
-  // get the server name
-  const serverName = message.guild.name;
-
+const callDifyAPI = async (query, conversationId = "", user = "") => {
   try {
-    // send POST request to https://api.dify.ai/v1 to get response
     const response = await fetch("https://api.dify.ai/v1/chat-messages", {
       method: "POST",
       headers: {
@@ -59,27 +53,41 @@ const aiResponse = async (message) => {
       },
       body: JSON.stringify({
         inputs: [],
-        query: message.content,
+        query: query,
         response_mode: "blocking",
-        conversation_id: conversations[serverName] || "",
-        user: serverName,
+        conversation_id: conversationId,
+        user: user,
       }),
     });
 
     if (!response.ok)
       throw new Error(response.statusText || `HTTP error ${response.status}`);
 
-    // extract JSON from the http response
-    const data = await response.json();
+    return await response.json();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 
-    // store the conversation id
+const aiResponse = async (message) => {
+  message.channel.sendTyping();
+
+  const serverName = message.guild.name;
+
+  try {
+    const data = await callDifyAPI(
+      message.content,
+      conversations[serverName] || "",
+      serverName,
+    );
+
     if (!conversations[serverName]) {
       conversations[serverName] = data.conversation_id;
     }
 
     return message.reply(data.answer);
   } catch (error) {
-    console.log(error);
     return message.reply(errorMessage);
   }
 };
@@ -101,53 +109,36 @@ const aiResponseAbrege = async (originalMessage, message) => {
   let command =
     "Abrège en une seule phrase le message suivant : " + message.content;
 
-  // add OCR with tesseract when the message contains a picture
-  if (message.attachments.size > 0) {
-    const attachment = message.attachments.first();
-    const url = attachment.url;
-    try {
-      const text = await recognizeFromUrl(url);
+  if (message.attachments.size > 0 || message.content.startsWith("https://")) {
+    const text = await extractTextFromAttachmentOrUrl(message);
+    if (text) {
       command += "\n\n" + text;
-    } catch (error) {}
+    }
   }
 
-  // add OCR with tesseract when the message contains a link
-  if (message.content.startsWith("https://")) {
-    const url = message.content;
-    try {
-      const text = await recognizeFromUrl(url);
-      command += "\n\n" + text;
-    } catch (error) {}
-  }
-
-  try {
-    // send POST request to https://api.dify.ai/v1 to get response
-    const response = await fetch("https://api.dify.ai/v1/chat-messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${difyToken}`,
-      },
-      body: JSON.stringify({
-        inputs: [],
-        query: command,
-        response_mode: "blocking",
-        conversation_id: "",
-        user: "abrege",
-      }),
-    });
-
-    if (!response.ok) {
-      console.error(response);
-      throw new Error(response.statusText || `HTTP error ${response.status}`);
+  const extractTextFromAttachmentOrUrl = async (message) => {
+    let url;
+    if (message.attachments.size > 0) {
+      const attachment = message.attachments.first();
+      url = attachment.url;
+    } else if (message.content.startsWith("https://")) {
+      url = message.content;
     }
 
-    // extract JSON from the http response
-    const data = await response.json();
+    if (url) {
+      try {
+        return await recognizeFromUrl(url);
+      } catch (error) {
+        console.error("Error recognizing text from URL:", error);
+      }
+    }
+    return null;
+  };
 
+  try {
+    const data = await callDifyAPI(command, "", "abrege");
     return originalMessage.reply(data.answer);
   } catch (error) {
-    console.log(error);
     return originalMessage.reply(errorMessage);
   }
 };
@@ -205,8 +196,8 @@ client.on(Events.MessageCreate, async (message) => {
     return message.reply(insult);
   }
 
-  // reply a random message randomly with a probability of 1 in 100 for messages longer than 20 characters
-  const random = Math.floor(Math.random() * 100);
+  // reply a random message randomly with a probability of 1 in 500 for messages longer than 20 characters
+  const random = Math.floor(Math.random() * 500);
   if (random == 1 && message.content.length > 20) {
     const randomReply =
       randomReplies[Math.floor(Math.random() * randomReplies.length)];

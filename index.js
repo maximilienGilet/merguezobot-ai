@@ -109,31 +109,10 @@ const aiResponseAbrege = async (originalMessage, message) => {
   let command =
     "Abrège en une seule phrase le message suivant : " + message.content;
 
-  if (message.attachments.size > 0 || message.content.startsWith("https://")) {
-    const text = await extractTextFromAttachmentOrUrl(message);
-    if (text) {
-      command += "\n\n" + text;
-    }
+  const extractedTexts = await extractTextFromAttachmentsOrUrl(message);
+  if (extractedTexts.length > 0) {
+    command += "\n\n" + extractedTexts.join("\n\n");
   }
-
-  const extractTextFromAttachmentOrUrl = async (message) => {
-    let url;
-    if (message.attachments.size > 0) {
-      const attachment = message.attachments.first();
-      url = attachment.url;
-    } else if (message.content.startsWith("https://")) {
-      url = message.content;
-    }
-
-    if (url) {
-      try {
-        return await recognizeFromUrl(url);
-      } catch (error) {
-        console.error("Error recognizing text from URL:", error);
-      }
-    }
-    return null;
-  };
 
   try {
     const data = await callDifyAPI(command, "", "abrege");
@@ -141,6 +120,34 @@ const aiResponseAbrege = async (originalMessage, message) => {
   } catch (error) {
     return originalMessage.reply(errorMessage);
   }
+};
+
+const extractTextFromAttachmentsOrUrl = async (message) => {
+  const extractedTexts = [];
+
+  if (message.attachments.size > 0) {
+    for (const attachment of message.attachments.values()) {
+      try {
+        const text = await recognizeFromUrl(attachment.url);
+        if (text) {
+          extractedTexts.push(text);
+        }
+      } catch (error) {
+        console.error("Error recognizing text from attachment:", error);
+      }
+    }
+  } else if (message.content.startsWith("https://")) {
+    try {
+      const text = await recognizeFromUrl(message.content);
+      if (text) {
+        extractedTexts.push(text);
+      }
+    } catch (error) {
+      console.error("Error recognizing text from URL:", error);
+    }
+  }
+
+  return extractedTexts;
 };
 
 // Create a new client instance

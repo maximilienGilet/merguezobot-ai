@@ -50,6 +50,13 @@ const randomReplies = [
   "Dégage avec ta merde",
   "MICRON DÉMISSION !!!!!!",
   "T'est tendue Natasha.",
+  "T'as été adopté",
+  "arrête.",
+  "cesse.",
+  "D'après le revue technique de la FZR1000, je m'en bats les couilles",
+  "Répète, qu'on s'en re-batte les couilles",
+  "Pourtant j'en ai entendu des conneries aujourd'hui",
+  "Alors les bavaroises, on se prend pour Schumacker ?",
 ];
 
 const callDifyAPI = async (query, conversationId = "", user = "") => {

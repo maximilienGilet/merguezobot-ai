@@ -41,6 +41,15 @@ const randomReplies = [
   "Mais ma parole vous êtes beuré vous aussi.",
   "Qui s'en fout ?",
   "Ta geule ?",
+  "Mais meeeeeerde",
+  "T'as essayer de fermer ta gueule ?",
+  "T'es le roi des cons au pays des emmerdeurs !",
+  "Nikoumouk !",
+  "Le jour où on mettra des cons sur orbite, t'as pas fini de tourner !",
+  "Ta mère elle boit de la Kro.",
+  "Dégage avec ta merde",
+  "MICRON DÉMISSION !!!!!!",
+  "T'est tendue Natasha.",
 ];
 
 const callDifyAPI = async (query, conversationId = "", user = "") => {

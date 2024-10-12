@@ -59,6 +59,28 @@ const randomReplies = [
   "Alors les bavaroises, on se prend pour Schumacker ?",
 ];
 
+const bastianoQuotes = [
+  "Attitude inébranlable, mais branle moi quand même",
+  "La barquette c'est pour l'asso, la quequette c'est pour Anne-So",
+  "Le mulet ça revient. Pas comme ma femme...",
+  "Je bande en haut débit",
+  "Le kiff n'est plus là",
+  "Les pick-ups avant les pin-ups",
+  "Increvable, comme ma bite",
+  "Hybride moi les couilles",
+  "Pissez pas dans l'eau, ça étrangle les dauphins",
+  "Ton fion illumine mes nuits tumultueuses",
+  "En route vers ton cul",
+  "Zig zig, zigounette au vent",
+  "Deux doigts sur la trois voies, elle est restée sans voix",
+  "T'es pas aussi chaude que ma BX",
+  "Nature, peinture, on bandera dans la confiture",
+  "Des bisous du Futuroscope, on a pris le futur en stop",
+  "Tu as tout mon soutien, et mon soutien-gorge aussi",
+  "Sans tabou, mais avec du taboulet",
+  "Là je bante, j'te raconte pas",
+];
+
 const callDifyAPI = async (query, conversationId = "", user = "") => {
   try {
     const response = await fetch("https://api.dify.ai/v1/chat-messages", {
@@ -185,6 +207,12 @@ client.once(Events.ClientReady, (c) => {
 client.login(discordToken);
 
 client.on(Events.MessageCreate, async (message) => {
+  if (message.content === "/bastiano") {
+    return message.reply(
+      bastianoQuotes[Math.floor(Math.random() * bastianoQuotes.length)],
+    );
+  }
+
   // Do not reply itself
   if (message.author.bot) return false;
 

@@ -57,6 +57,11 @@ const randomReplies = [
   "Répète, qu'on s'en re-batte les couilles",
   "Pourtant j'en ai entendu des conneries aujourd'hui",
   "Alors les bavaroises, on se prend pour Schumacker ?",
+  "C'est la raison pour laquelle tu baises pas !",
+  "C'est marrant ce que tu dis parce que c'est pas tellement marrant",
+  "Tu vois au début, je t'aimais pas beaucoup. Mais là, plus le temps passe, et moins je peux te saquer",
+  "Il y a que ça des salopes autour de moi",
+  "T'as pas inventé le melon toi",
 ];
 
 const bastianoQuotes = [

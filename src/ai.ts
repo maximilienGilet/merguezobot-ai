@@ -2,6 +2,7 @@ import { Message, OmitPartialGroupDMChannel, TextChannel } from "discord.js";
 import { errorMessage } from "./replies";
 import { extractTextFromAttachmentsOrUrl } from "./ocr";
 import dotenv from "dotenv";
+import { getLastNMessages, getMessagesSince } from "./discord-utils";
 dotenv.config(); // Load environment variables from .env file
 
 const difyToken = process.env.DIFY_TOKEN;
@@ -106,4 +107,52 @@ const aiResponseAbrege = async (
   }
 };
 
-export { aiResponse, aiResponseAbrege };
+const aiResponseAbregeNMessages = async (
+  message: OmitPartialGroupDMChannel<Message<boolean>>,
+  n: number,
+) => {
+  message.channel.sendTyping();
+
+  const lastMessages = await getLastNMessages(message.channel, n);
+
+  let command = "Abrège en une seule phrase les messages suivant : ";
+
+  lastMessages.forEach((message) => {
+    command += `${message}\n`;
+  });
+
+  try {
+    const data = await callDifyAPI(command, "", "abrege");
+    return message.reply(data.answer);
+  } catch (error) {
+    return message.reply(errorMessage);
+  }
+};
+
+const aiResponseAbregeSince = async (
+  message: OmitPartialGroupDMChannel<Message<boolean>>,
+) => {
+  message.channel.sendTyping();
+
+  const messages = await getMessagesSince(message.channel, message.id);
+
+  let command = "Abrège en une seule phrase les messages suivant : ";
+
+  messages.forEach((message) => {
+    command += `${message}\n`;
+  });
+
+  try {
+    const data = await callDifyAPI(command, "", "abrege");
+    return message.reply(data.answer);
+  } catch (error) {
+    return message.reply(errorMessage);
+  }
+};
+
+export {
+  aiResponse,
+  aiResponseAbrege,
+  aiResponseAbregeNMessages,
+  aiResponseAbregeSince,
+};

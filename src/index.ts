@@ -1,5 +1,10 @@
 import http from "http";
-import { aiResponse, aiResponseAbrege } from "./ai";
+import {
+  aiResponse,
+  aiResponseAbrege,
+  aiResponseAbregeNMessages,
+  aiResponseAbregeSince,
+} from "./ai";
 import { config } from "./config";
 import { insults, randomReplies } from "./replies";
 import { Client, Events, GatewayIntentBits, MessageType } from "discord.js";
@@ -56,6 +61,21 @@ client.on(Events.MessageCreate, async (message) => {
       message.content.toLowerCase().includes("abrège")) &&
     !message.mentions.has(client.user!.id)
   ) {
+    // do a recap since the replied message
+    if (message.content.toLowerCase().includes("depuis")) {
+      return await aiResponseAbregeSince(message);
+    }
+
+    // do a recap of the last n messages
+    const match = message.content.match(/\d+/);
+    if (match) {
+      const n = parseInt(match[0]);
+      if (n > 0 && n < 100) {
+        return await aiResponseAbregeNMessages(message, n);
+      }
+    }
+
+    // do a recap of the replied message
     const referenceMessage = await message.fetchReference();
     return await aiResponseAbrege(message, referenceMessage);
   }

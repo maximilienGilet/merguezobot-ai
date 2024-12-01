@@ -1,8 +1,9 @@
-import { Message, OmitPartialGroupDMChannel, TextChannel } from "discord.js";
-import { errorMessage } from "./replies";
-import { extractTextFromAttachmentsOrUrl } from "./ocr";
+import { Message, OmitPartialGroupDMChannel } from "discord.js";
 import dotenv from "dotenv";
+import { config } from "./config";
 import { getLastNMessages, getMessagesSince } from "./discord-utils";
+import { extractTextFromAttachmentsOrUrl } from "./ocr";
+import { errorMessage } from "./replies";
 dotenv.config(); // Load environment variables from .env file
 
 const difyToken = process.env.DIFY_TOKEN;
@@ -38,7 +39,8 @@ const callDifyAPI = async (
 
     return (await response.json()) as DifyResponse;
   } catch (error) {
-    console.log(error);
+    console.error("Error in callDifyAPI");
+    console.error(error);
     throw error;
   }
 };
@@ -81,6 +83,8 @@ const aiResponse = async (
 
     return message.reply(data.answer);
   } catch (error) {
+    console.error("Error in aiResponse");
+    console.error(error);
     return message.reply(errorMessage);
   }
 };
@@ -103,6 +107,8 @@ const aiResponseAbrege = async (
     const data = await callDifyAPI(command, "", "abrege");
     return originalMessage.reply(data.answer);
   } catch (error) {
+    console.log("Error in aiResponseAbrege");
+    console.log(error);
     return originalMessage.reply(errorMessage);
   }
 };
@@ -113,9 +119,9 @@ const aiResponseAbregeNMessages = async (
 ) => {
   message.channel.sendTyping();
 
-  const lastMessages = await getLastNMessages(message.channel, n);
+  const lastMessages = await getLastNMessages(message.channel, n, message.id);
 
-  let command = "Abrège en une seule phrase les messages suivant : ";
+  let command = config.abregeMessagesPrompt;
 
   lastMessages.forEach((message) => {
     command += `${message}\n`;
@@ -125,18 +131,21 @@ const aiResponseAbregeNMessages = async (
     const data = await callDifyAPI(command, "", "abrege");
     return message.reply(data.answer);
   } catch (error) {
+    console.error("Error in aiResponseAbregeNMessages");
+    console.error(error);
     return message.reply(errorMessage);
   }
 };
 
 const aiResponseAbregeSince = async (
   message: OmitPartialGroupDMChannel<Message<boolean>>,
+  sinceMessageId: string,
 ) => {
   message.channel.sendTyping();
 
-  const messages = await getMessagesSince(message.channel, message.id);
+  const messages = await getMessagesSince(message.channel, sinceMessageId);
 
-  let command = "Abrège en une seule phrase les messages suivant : ";
+  let command = config.abregeMessagesPrompt;
 
   messages.forEach((message) => {
     command += `${message}\n`;
@@ -146,6 +155,8 @@ const aiResponseAbregeSince = async (
     const data = await callDifyAPI(command, "", "abrege");
     return message.reply(data.answer);
   } catch (error) {
+    console.error("Error in aiResponseAbregeSince");
+    console.error(error);
     return message.reply(errorMessage);
   }
 };

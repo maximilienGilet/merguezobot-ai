@@ -1,3 +1,5 @@
+import { Client, Events, GatewayIntentBits } from "discord.js";
+import dotenv from "dotenv";
 import http from "http";
 import {
   aiResponse,
@@ -5,12 +7,10 @@ import {
   aiResponseAbregeNMessages,
   aiResponseAbregeSince,
 } from "./ai";
-import { config } from "./config";
-import { insults, randomReplies } from "./replies";
-import { Client, Events, GatewayIntentBits, MessageType } from "discord.js";
-import { deployCommands } from "./deploy-commands";
 import { commands } from "./commands";
-import dotenv from "dotenv";
+import { config } from "./config";
+import { deployCommands } from "./deploy-commands";
+import { insults, randomReplies } from "./replies";
 dotenv.config(); // Load environment variables from .env file
 
 // Store conversations in memory
@@ -63,41 +63,53 @@ client.on(Events.MessageCreate, async (message) => {
   ) {
     // do a recap since the replied message
     if (message.content.toLowerCase().includes("depuis")) {
-      return await aiResponseAbregeSince(message);
-    }
-
-    // do a recap of the last n messages
-    const match = message.content.match(/\d+/);
-    if (match) {
-      const n = parseInt(match[0]);
-      if (n > 0 && n < 100) {
-        return await aiResponseAbregeNMessages(message, n);
+      const referenceMessage = await message.fetchReference();
+      const fetchedMessages = await referenceMessage.channel.messages.fetch({
+        before: referenceMessage.id,
+        limit: 1,
+      });
+      const lastMessage = fetchedMessages.first();
+      if (lastMessage) {
+        return await aiResponseAbregeSince(message, lastMessage.id);
       }
     }
 
     // do a recap of the replied message
     const referenceMessage = await message.fetchReference();
     return await aiResponseAbrege(message, referenceMessage);
-  }
+  } else {
+    // When talking to the bot
+    if (message.mentions.has(client.user!.id)) {
+      // do a recap of the last n messages
+      // match the regex "abrege" or "abrège" with a number between 1 and 100 in the message
+      const match = message.content
+        .toLowerCase()
+        .match(/(abrege|abrège).*?(\d{1,2}|100)/i);
+      if (match) {
+        const n = parseInt(match[2]);
+        if (n > 0 && n < 100) {
+          return await aiResponseAbregeNMessages(message, n);
+        }
+      } else {
+        // Normal reply
+        return await aiResponse(message, conversations);
+      }
+    }
 
-  // When talking to the bot
-  if (message.mentions.has(client.user!.id)) {
-    return await aiResponse(message, conversations);
-  }
+    // If the message is send by François and it talks about his CX, reply with a random insult
+    const isFrancois = message.author.username === config.francois;
+    if (isFrancois && message.content.toLowerCase().includes("cx")) {
+      const insult = insults[Math.floor(Math.random() * insults.length)];
+      return message.reply(insult);
+    }
 
-  // If the message is send by François and it talks about his CX, reply with a random insult
-  const isFrancois = message.author.username === config.francois;
-  if (isFrancois && message.content.toLowerCase().includes("cx")) {
-    const insult = insults[Math.floor(Math.random() * insults.length)];
-    return message.reply(insult);
-  }
-
-  // reply a random message randomly with a probability of 1 in 500 for messages longer than 20 characters
-  const random = Math.floor(Math.random() * 500);
-  if (random == 1 && message.content.length > 20) {
-    const randomReply =
-      randomReplies[Math.floor(Math.random() * randomReplies.length)];
-    return message.reply(randomReply);
+    // reply a random message randomly with a probability of 1 in 500 for messages longer than 20 characters
+    const random = Math.floor(Math.random() * 500);
+    if (random == 1 && message.content.length > 20) {
+      const randomReply =
+        randomReplies[Math.floor(Math.random() * randomReplies.length)];
+      return message.reply(randomReply);
+    }
   }
 });
 
@@ -117,7 +129,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // Respond to health checks
 http
-  .createServer(function (req, res) {
+  .createServer(function (_req, res) {
     res.write("I'm alive");
     res.end();
   })

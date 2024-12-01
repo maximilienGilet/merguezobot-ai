@@ -30,15 +30,29 @@ const extractContent = async (message: Message) => {
 };
 
 // get last n messages from a channel
-const getLastNMessages = async (channel: Channel, n: number) => {
-  const messages = await channel.messages.fetch({ limit: n });
-  return messages.map(extractContent);
+const getLastNMessages = async (
+  channel: Channel,
+  n: number,
+  messageId?: string,
+) => {
+  const messages = await channel.messages.fetch({
+    limit: n,
+    before: messageId,
+  });
+  const extractedMessages = await Promise.all(
+    messages.map(async (message) => await extractContent(message)),
+  );
+  return extractedMessages.reverse();
 };
 
 // get messages since a message id
 const getMessagesSince = async (channel: Channel, messageId: string) => {
   const messages = await channel.messages.fetch({ after: messageId });
-  return messages.map(extractContent);
+  const extractedMessages = await Promise.all(
+    messages.map(async (message) => await extractContent(message)),
+  );
+  return extractedMessages.reverse();
 };
 
 export { getLastNMessages, getMessagesSince };
+export type { Channel };

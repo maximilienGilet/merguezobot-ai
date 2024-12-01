@@ -1,4 +1,4 @@
-import { Message, OmitPartialGroupDMChannel } from "discord.js";
+import { Message, OmitPartialGroupDMChannel, TextChannel } from "discord.js";
 import { errorMessage } from "./replies";
 import { extractTextFromAttachmentsOrUrl } from "./ocr";
 import dotenv from "dotenv";
@@ -63,8 +63,15 @@ const aiResponse = async (
   const serverName = message.guild?.name ?? "";
 
   try {
+    let context = "";
+
+    const extractedTexts = await extractTextFromAttachmentsOrUrl(message);
+    if (extractedTexts.length > 0) {
+      context = `Contexte :\n\n${extractedTexts.join("\n\n")}`;
+    }
+
     const data = (await callDifyAPI(
-      message.content,
+      message.content + context,
       conversations[serverName] || "",
       serverName,
     )) as DifyResponse;
@@ -88,7 +95,7 @@ const aiResponseAbrege = async (
 
   const extractedTexts = await extractTextFromAttachmentsOrUrl(message);
   if (extractedTexts.length > 0) {
-    command += "\n\n" + extractedTexts.join("\n\n");
+    command = `${command}\n\n${extractedTexts.join("\n\n")}`;
   }
 
   try {

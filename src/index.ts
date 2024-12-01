@@ -58,7 +58,9 @@ client.on(Events.MessageCreate, async (message) => {
   if (
     message.reference?.messageId &&
     (message.content.toLowerCase().includes("abrege") ||
-      message.content.toLowerCase().includes("abrège")) &&
+      message.content.toLowerCase().includes("abrège") ||
+      message.content.toLowerCase().includes("resume") ||
+      message.content.toLowerCase().includes("résume")) &&
     !message.mentions.has(client.user!.id)
   ) {
     // do a recap since the replied message
@@ -84,7 +86,7 @@ client.on(Events.MessageCreate, async (message) => {
       // match the regex "abrege" or "abrège" with a number between 1 and 100 in the message
       const match = message.content
         .toLowerCase()
-        .match(/(abrege|abrège).*?(\d{1,2}|100)/i);
+        .match(/(abrege|abrège|resume|résume).*?(\d{1,2}|100)/i);
       if (match) {
         const n = parseInt(match[2]);
         if (n > 0 && n < 100) {

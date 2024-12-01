@@ -64,4 +64,4 @@ export const bastianoQuotes = [
   "Là je bante, j'te raconte pas",
 ];
 
-export const errorMessage = process.env.ERROR_MESSAGE;
+export const errorMessage = process.env.ERROR_MESSAGE ?? "Error";

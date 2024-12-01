@@ -1,6 +1,7 @@
-const tesseract = require("node-tesseract-ocr");
+import { Message } from "discord.js";
+import tesseract from "node-tesseract-ocr";
 
-const recognizeFromUrl = async (url) => {
+const recognizeFromUrl = async (url: string) => {
   const config = {
     lang: "fra",
     oem: 1,
@@ -11,7 +12,7 @@ const recognizeFromUrl = async (url) => {
   return text;
 };
 
-const extractTextFromAttachmentsOrUrl = async (message) => {
+const extractTextFromAttachmentsOrUrl = async (message: Message) => {
   const extractedTexts = [];
 
   if (message.attachments.size > 0) {

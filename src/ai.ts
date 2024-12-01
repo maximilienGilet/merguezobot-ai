@@ -1,9 +1,21 @@
-const fetch = require("node-fetch");
-const extractTextFromAttachmentsOrUrl = require("./ocr");
+import { Message, OmitPartialGroupDMChannel } from "discord.js";
+import { errorMessage } from "./replies";
+import { extractTextFromAttachmentsOrUrl } from "./ocr";
+import dotenv from "dotenv";
+dotenv.config(); // Load environment variables from .env file
 
 const difyToken = process.env.DIFY_TOKEN;
 
-const callDifyAPI = async (query, conversationId = "", user = "") => {
+interface DifyResponse {
+  answer: string;
+  conversation_id: string;
+}
+
+const callDifyAPI = async (
+  query: string,
+  conversationId = "",
+  user = "",
+): Promise<DifyResponse> => {
   try {
     const response = await fetch("https://api.dify.ai/v1/chat-messages", {
       method: "POST",
@@ -23,7 +35,7 @@ const callDifyAPI = async (query, conversationId = "", user = "") => {
     if (!response.ok)
       throw new Error(response.statusText || `HTTP error ${response.status}`);
 
-    return await response.json();
+    return (await response.json()) as DifyResponse;
   } catch (error) {
     console.log(error);
     throw error;
@@ -31,9 +43,9 @@ const callDifyAPI = async (query, conversationId = "", user = "") => {
 };
 
 const updateConversations = async (
-  conversations,
-  serverName,
-  conversationId,
+  conversations: Record<string, string>,
+  serverName: string,
+  conversationId: string,
 ) => {
   if (!conversations[serverName]) {
     conversations[serverName] = conversationId;
@@ -42,17 +54,20 @@ const updateConversations = async (
   return conversations;
 };
 
-const aiResponse = async (message, conversations) => {
+const aiResponse = async (
+  message: OmitPartialGroupDMChannel<Message<boolean>>,
+  conversations: Record<string, string>,
+) => {
   message.channel.sendTyping();
 
-  const serverName = message.guild.name;
+  const serverName = message.guild?.name ?? "";
 
   try {
-    const data = await callDifyAPI(
+    const data = (await callDifyAPI(
       message.content,
       conversations[serverName] || "",
       serverName,
-    );
+    )) as DifyResponse;
 
     updateConversations(conversations, serverName, data.conversation_id);
 
@@ -62,7 +77,10 @@ const aiResponse = async (message, conversations) => {
   }
 };
 
-const aiResponseAbrege = async (originalMessage, message) => {
+const aiResponseAbrege = async (
+  originalMessage: OmitPartialGroupDMChannel<Message<boolean>>,
+  message: OmitPartialGroupDMChannel<Message<boolean>>,
+) => {
   message.channel.sendTyping();
 
   let command =

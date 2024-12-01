@@ -4,7 +4,8 @@ import { config } from "./config";
 import { insults, randomReplies } from "./replies";
 import { Client, Events, GatewayIntentBits, MessageType } from "discord.js";
 import { deployCommands } from "./deploy-commands";
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config(); // Load environment variables from .env file
 
 // Store conversations in memory
 const conversations = {};

@@ -4,6 +4,7 @@ import { config } from "./config";
 import { insults, randomReplies } from "./replies";
 import { Client, Events, GatewayIntentBits, MessageType } from "discord.js";
 import { deployCommands } from "./deploy-commands";
+import { commands } from "./commands";
 import dotenv from "dotenv";
 dotenv.config(); // Load environment variables from .env file
 
@@ -76,6 +77,20 @@ client.on(Events.MessageCreate, async (message) => {
       randomReplies[Math.floor(Math.random() * randomReplies.length)];
     return message.reply(randomReply);
   }
+});
+
+// Handle slash commands
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isCommand()) return;
+
+  const commandName = interaction.commandName;
+
+  // dynamically call commands
+  Object.values(commands).map((command) => {
+    if (command.data.name === commandName) {
+      command.execute(interaction);
+    }
+  });
 });
 
 // Respond to health checks

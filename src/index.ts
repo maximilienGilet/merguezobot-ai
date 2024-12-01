@@ -37,30 +37,32 @@ client.login(discordToken);
 
 client.on(Events.MessageCreate, async (message) => {
   // Do not reply itself
-  if (message.author.bot) return false;
+  if (message.author.bot) {
+    return false;
+  }
 
-  // Do not reply to @here, @everyone or basic replies
+  // Do not reply to @here, @everyone
   if (
     message.content.includes("@here") ||
-    message.content.includes("@everyone") ||
-    message.type == MessageType.Reply
-  )
+    message.content.includes("@everyone")
+  ) {
     return false;
-
-  // When talking to the bot
-  if (message.mentions.has(client.user!.id)) {
-    return await aiResponse(message, conversations);
   }
 
   // when asking "abrege" or "abrège", and the message is not a reply to the bot
   if (
-    ((message.reference?.messageId &&
-      message.content.toLowerCase().includes("abrege")) ||
+    message.reference?.messageId &&
+    (message.content.toLowerCase().includes("abrege") ||
       message.content.toLowerCase().includes("abrège")) &&
     !message.mentions.has(client.user!.id)
   ) {
     const referenceMessage = await message.fetchReference();
     return await aiResponseAbrege(message, referenceMessage);
+  }
+
+  // When talking to the bot
+  if (message.mentions.has(client.user!.id)) {
+    return await aiResponse(message, conversations);
   }
 
   // If the message is send by François and it talks about his CX, reply with a random insult

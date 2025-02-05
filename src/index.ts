@@ -112,6 +112,11 @@ client.on(Events.MessageCreate, async (message) => {
         randomReplies[Math.floor(Math.random() * randomReplies.length)];
       return message.reply(randomReply);
     }
+
+    // Auto summarize long messages
+    if (message.content.length > 1000) {
+      return await aiResponseAbrege(message, message);
+    }
   }
 });
 

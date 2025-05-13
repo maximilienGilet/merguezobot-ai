@@ -10,7 +10,7 @@ import {
 import { commands } from "./commands";
 import { config } from "./config";
 import { deployCommands } from "./deploy-commands";
-import { insults, randomReplies } from "./replies";
+import { insults, insultsX, randomReplies } from "./replies";
 dotenv.config(); // Load environment variables from .env file
 
 // Store conversations in memory
@@ -102,6 +102,13 @@ client.on(Events.MessageCreate, async (message) => {
     const isFrancois = message.author.username === config.francois;
     if (isFrancois && message.content.toLowerCase().includes("cx")) {
       const insult = insults[Math.floor(Math.random() * insults.length)];
+      return message.reply(insult);
+    }
+
+    // If the message is send by LGD and it talks about X, reply with a random insult
+    const isLGD = message.author.username === config.lgd;
+    if (isLGD && message.content.toLowerCase().includes("https://x.com")) {
+      const insult = insultsX[Math.floor(Math.random() * insultsX.length)];
       return message.reply(insult);
     }
 

@@ -10,6 +10,19 @@ export const insults = [
   "C'était mieux quand t'étais mute",
 ];
 
+export const insultsX = [
+  "Désinstalle X",
+  "Être accro à X c'est pire qu'être obèse",
+  "Partager des liens X c'est pire qu'être puceau",
+  "OK LouisgabX",
+  "Ah parce qu'en plus t'es nazi ?",
+  "Désinstalle.",
+  "Encore un lien X et t'es ban",
+  "Ferme la à tout jamais",
+  "Toujours pas désinstallé... Troudbal",
+  "Arrête.",
+];
+
 export const randomReplies = [
   "Ouais fin raconte pas ta vie",
   "Ok tamere",

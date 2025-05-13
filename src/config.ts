@@ -9,6 +9,7 @@ if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
 }
 
 const francois = "fr.popeye";
+const lgd = "lgd.popeye";
 
 const abregeMessagesPrompt = `
 Abrège les messages de manière concise en faisant des phrases. Les messages sont formatés comme suit :
@@ -30,4 +31,5 @@ export const config = {
   DISCORD_CLIENT_ID,
   francois,
   abregeMessagesPrompt,
+  lgd,
 };

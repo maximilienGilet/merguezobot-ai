@@ -9,7 +9,7 @@ if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
 }
 
 const francois = "fr.popeye";
-const lgd = "lgd.popeye";
+const lgd = "carpetubage";
 
 const abregeMessagesPrompt = `
 Abrège les messages de manière concise en faisant des phrases. Les messages sont formatés comme suit :

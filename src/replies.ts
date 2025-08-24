@@ -8,6 +8,7 @@ export const insults = [
   "Va plutôt faire la carte grise au lieu de nous casser les couilles",
   "Euh, ta gueule pour voir ?",
   "C'était mieux quand t'étais mute",
+  "T'as pensé à demander l'AAH ?",
 ];
 
 export const insultsX = [

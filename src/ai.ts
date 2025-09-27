@@ -6,29 +6,30 @@ import { extractTextFromAttachmentsOrUrl } from "./ocr";
 import { errorMessage } from "./replies";
 dotenv.config(); // Load environment variables from .env file
 
-const difyToken = process.env.DIFY_TOKEN;
-
-interface DifyResponse {
-  answer: string;
-  conversation_id: string;
+interface N8nResponse {
+  answer?: string;
+  conversation_id?: string;
+  [key: string]: unknown;
 }
 
-const callDifyAPI = async (
+const callN8nAPI = async (
   query: string,
   conversationId = "",
   user = "",
-): Promise<DifyResponse> => {
+): Promise<N8nResponse> => {
   try {
-    const response = await fetch("https://api.dify.ai/v1/chat-messages", {
+    const basicAuthToken = Buffer.from(
+      `${config.n8n.username}:${config.n8n.password}`,
+    ).toString("base64");
+
+    const response = await fetch(config.n8n.url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${difyToken}`,
+        Authorization: `Basic ${basicAuthToken}`,
       },
       body: JSON.stringify({
-        inputs: [],
         query: query,
-        response_mode: "blocking",
         conversation_id: conversationId,
         user: user,
       }),
@@ -37,9 +38,20 @@ const callDifyAPI = async (
     if (!response.ok)
       throw new Error(response.statusText || `HTTP error ${response.status}`);
 
-    return (await response.json()) as DifyResponse;
+    const raw = await response.text();
+    console.log(raw);
+
+    try {
+      return JSON.parse(raw) as N8nResponse;
+    } catch (parseError) {
+      console.warn("n8n response was not JSON, using raw text");
+      return {
+        answer: raw,
+        conversation_id: conversationId,
+      };
+    }
   } catch (error) {
-    console.error("Error in callDifyAPI");
+    console.error("Error in callN8nAPI");
     console.error(error);
     throw error;
   }
@@ -73,15 +85,21 @@ const aiResponse = async (
       context = `Contexte :\n\n${extractedTexts.join("\n\n")}`;
     }
 
-    const data = (await callDifyAPI(
+    const data = (await callN8nAPI(
       message.content + context,
-      conversations[serverName] || "",
       serverName,
-    )) as DifyResponse;
+    )) as N8nResponse;
 
-    updateConversations(conversations, serverName, data.conversation_id);
+    if (data.conversation_id) {
+      updateConversations(conversations, serverName, data.conversation_id);
+    }
 
-    return message.reply(data.answer);
+    const answer =
+      typeof data.answer === "string" && data.answer.trim().length > 0
+        ? data.answer
+        : errorMessage;
+
+    return message.reply(answer);
   } catch (error) {
     console.error("Error in aiResponse");
     console.error(error);
@@ -104,8 +122,12 @@ const aiResponseAbrege = async (
   }
 
   try {
-    const data = await callDifyAPI(command, "", "abrege");
-    return originalMessage.reply(data.answer);
+    const data = await callN8nAPI(command, "", "abrege");
+    const answer =
+      typeof data.answer === "string" && data.answer.trim().length > 0
+        ? data.answer
+        : errorMessage;
+    return originalMessage.reply(answer);
   } catch (error) {
     console.log("Error in aiResponseAbrege");
     console.log(error);
@@ -128,8 +150,12 @@ const aiResponseAbregeNMessages = async (
   });
 
   try {
-    const data = await callDifyAPI(command, "", "abrege");
-    return message.reply(data.answer);
+    const data = await callN8nAPI(command, "", "abrege");
+    const answer =
+      typeof data.answer === "string" && data.answer.trim().length > 0
+        ? data.answer
+        : errorMessage;
+    return message.reply(answer);
   } catch (error) {
     console.error("Error in aiResponseAbregeNMessages");
     console.error(error);
@@ -152,8 +178,12 @@ const aiResponseAbregeSince = async (
   });
 
   try {
-    const data = await callDifyAPI(command, "", "abrege");
-    return message.reply(data.answer);
+    const data = await callN8nAPI(command, "", "abrege");
+    const answer =
+      typeof data.answer === "string" && data.answer.trim().length > 0
+        ? data.answer
+        : errorMessage;
+    return message.reply(answer);
   } catch (error) {
     console.error("Error in aiResponseAbregeSince");
     console.error(error);

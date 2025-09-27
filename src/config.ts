@@ -2,10 +2,20 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const { DISCORD_TOKEN, DISCORD_CLIENT_ID } = process.env;
+const {
+  DISCORD_TOKEN,
+  DISCORD_CLIENT_ID,
+  N8N_URL,
+  N8N_USERNAME,
+  N8N_PASSWORD,
+} = process.env;
 
 if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
   throw new Error("Missing environment variables");
+}
+
+if (!N8N_URL || !N8N_USERNAME || !N8N_PASSWORD) {
+  throw new Error("Missing n8n configuration variables");
 }
 
 const francois = "fr.popeye";
@@ -32,4 +42,9 @@ export const config = {
   francois,
   abregeMessagesPrompt,
   lgd,
+  n8n: {
+    url: N8N_URL,
+    username: N8N_USERNAME,
+    password: N8N_PASSWORD,
+  },
 };

@@ -10,6 +10,7 @@ import {
 import { commands } from "./commands";
 import { config } from "./config";
 import { deployCommands } from "./deploy-commands";
+import { findEmbedConversions } from "./fix-embed";
 import { insults, insultsX, randomReplies } from "./replies";
 dotenv.config(); // Load environment variables from .env file
 
@@ -54,6 +55,18 @@ client.on(Events.MessageCreate, async (message) => {
     return false;
   }
 
+  const botUserId = client.user?.id;
+  const mentionsBot = botUserId ? message.mentions.has(botUserId) : false;
+
+  const embedConversions = findEmbedConversions(message.content);
+  if (embedConversions.length > 0) {
+    const formatted = embedConversions
+      .map((conversion) => conversion.converted)
+      .join("\n");
+
+    await message.reply(formatted);
+  }
+
   // when asking "abrege" or "abrège", and the message is not a reply to the bot
   if (
     message.reference?.messageId &&
@@ -61,7 +74,7 @@ client.on(Events.MessageCreate, async (message) => {
       message.content.toLowerCase().includes("abrège") ||
       message.content.toLowerCase().includes("resume") ||
       message.content.toLowerCase().includes("résume")) &&
-    !message.mentions.has(client.user!.id)
+    !mentionsBot
   ) {
     // do a recap since the replied message
     if (message.content.toLowerCase().includes("depuis")) {
@@ -81,7 +94,7 @@ client.on(Events.MessageCreate, async (message) => {
     return await aiResponseAbrege(message, referenceMessage);
   } else {
     // When talking to the bot
-    if (message.mentions.has(client.user!.id)) {
+    if (mentionsBot) {
       // do a recap of the last n messages
       // match the regex "abrege" or "abrège" with a number between 1 and 100 in the message
       const match = message.content

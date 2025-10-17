@@ -114,7 +114,7 @@ const domainAlternatives = Object.keys(domainConfigs)
   .join("|");
 
 const fixableUrlRegex = new RegExp(
-  `(?:https?:\\/\\/)?(?:[\\w-]+\\.)*(?:${domainAlternatives})[^\\s<>]*`,
+  `(?:https?:\/\/)?(?:[\w-]+\.)*(?<![\w-])(?:${domainAlternatives})(?:[\/?#][^\s<>]*)?`,
   "gi",
 );
 
